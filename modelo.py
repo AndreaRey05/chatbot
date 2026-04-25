@@ -79,13 +79,13 @@ model = AutoModelForSequenceClassification.from_pretrained(
 # 7. Configuración de entrenamiento (usa evaluation_strategy)
 training_args = TrainingArguments(
     output_dir="./results",
-    #evaluation_strategy="epoch",
+    evaluation_strategy="epoch",
     save_strategy="epoch",
-    learning_rate=2e-5,
+    learning_rate=1e-5, #aprende más despacio para evitar sobreajuste
     per_device_train_batch_size=4,  #Este parámetro puede generar problemas de memoria insuficiente
     per_device_eval_batch_size=2,
-    num_train_epochs=4,
-    weight_decay=0.01,
+    num_train_epochs=2,
+    weight_decay=0.1, #penaliza los pesos grandes para evitar sobreajuste
     logging_dir="./logs",
     logging_steps=50,
 )
