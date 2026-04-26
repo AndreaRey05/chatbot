@@ -1,4 +1,3 @@
-
 # probar otros modelos de bert
 import pandas as pd
 from datasets import Dataset
@@ -13,6 +12,10 @@ from transformers import (
 # A Symphony of Rage
 # 1. Cargar CSV
 df = pd.read_csv("diabetes_emociones.csv", encoding="utf-8")[["label", "text"]]
+
+print(df["label"].value_counts())
+#df["label"] = df["label"].str.replace("negación_incredulidad", "negacion_incredulidad")
+
 df["label"] = df["label"].map({    
                 "miedo_ansiedad": 0,
                 "tristeza": 1,
@@ -33,6 +36,7 @@ df["label"] = df["label"].map({
 df["label"] = df["label"].astype('int64')  
 
 
+
 # 2. Dividir en train/test
 train_df, test_df = train_test_split(df, test_size=0.3, random_state=42)
 
@@ -41,7 +45,7 @@ train_dataset = Dataset.from_pandas(train_df)
 test_dataset = Dataset.from_pandas(test_df)
 
 # 4. Tokenizador
-model_name = "distilbert-base-uncased" #La principal ventaja de este modelo de IA es su rendimiento. Requiere menos recursos computacionales
+model_name = "dccuchile/bert-base-spanish-wwm-cased" #La principal ventaja de este modelo de IA es su rendimiento. Requiere menos recursos computacionales
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 def tokenize(batch):
@@ -81,10 +85,12 @@ training_args = TrainingArguments(
     output_dir="./results",
     evaluation_strategy="epoch",
     save_strategy="epoch",
-    learning_rate=1e-5, #aprende más despacio para evitar sobreajuste
+    load_best_model_at_end=True,  # Guarda el modelo en la época con menor validation loss
+    metric_for_best_model="eval_loss",
+    learning_rate=3e-5, #aprende más o menos despacio para evitar sobreajuste
     per_device_train_batch_size=4,  #Este parámetro puede generar problemas de memoria insuficiente
     per_device_eval_batch_size=2,
-    num_train_epochs=2,
+    num_train_epochs=5,
     weight_decay=0.1, #penaliza los pesos grandes para evitar sobreajuste
     logging_dir="./logs",
     logging_steps=50,
