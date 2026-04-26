@@ -13,8 +13,8 @@ from transformers import (
 # 1. Cargar CSV
 df = pd.read_csv("diabetes_emociones.csv", encoding="utf-8")[["label", "text"]]
 
-print(df["label"].value_counts())
-#df["label"] = df["label"].str.replace("negación_incredulidad", "negacion_incredulidad")
+# print(df["label"].value_counts())
+# df["label"] = df["label"].str.replace("negación_incredulidad", "negacion_incredulidad")
 
 df["label"] = df["label"].map({    
                 "miedo_ansiedad": 0,
@@ -83,7 +83,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
 # 7. Configuración de entrenamiento (usa evaluation_strategy)
 training_args = TrainingArguments(
     output_dir="./results",
-    evaluation_strategy="epoch",
+    eval_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,  # Guarda el modelo en la época con menor validation loss
     metric_for_best_model="eval_loss",
@@ -95,6 +95,7 @@ training_args = TrainingArguments(
     logging_dir="./logs",
     logging_steps=50,
 )
+
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
