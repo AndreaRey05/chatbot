@@ -9,6 +9,14 @@ from transformers import (
     Trainer,
     DataCollatorWithPadding
 )
+from sklearn.metrics import accuracy_score
+import numpy as np
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return {"accuracy": accuracy_score(labels, predictions)}
+
 # A Symphony of Rage
 # 1. Cargar CSV
 df = pd.read_csv("diabetes_emociones.csv", encoding="utf-8")[["label", "text"]]
@@ -45,7 +53,10 @@ train_dataset = Dataset.from_pandas(train_df)
 test_dataset = Dataset.from_pandas(test_df)
 
 # 4. Tokenizador
-model_name = "dccuchile/bert-base-spanish-wwm-cased" #La principal ventaja de este modelo de IA es su rendimiento. Requiere menos recursos computacionales
+# model_name = "dccuchile/bert-base-spanish-wwm-cased" #La principal ventaja de este modelo de IA es su rendimiento. Requiere menos recursos computacionales
+
+model_name = "dccuchile/distilbert-base-spanish"
+
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 def tokenize(batch):
@@ -87,11 +98,11 @@ training_args = TrainingArguments(
     save_strategy="epoch",
     load_best_model_at_end=True,  # Guarda el modelo en la época con menor validation loss
     metric_for_best_model="eval_loss",
-    learning_rate=3e-5, #aprende más o menos despacio para evitar sobreajuste
-    per_device_train_batch_size=4,  #Este parámetro puede generar problemas de memoria insuficiente
+    learning_rate=2e-5, #aprende más o menos despacio para evitar sobreajuste
+    per_device_train_batch_size=3,  #Este parámetro puede generar problemas de memoria insuficiente
     per_device_eval_batch_size=2,
-    num_train_epochs=5,
-    weight_decay=0.1, #penaliza los pesos grandes para evitar sobreajuste
+    num_train_epochs=6,
+    weight_decay=0.06, #penaliza los pesos grandes para evitar sobreajuste
     logging_dir="./logs",
     logging_steps=50,
 )
@@ -105,7 +116,8 @@ trainer = Trainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=test_dataset,
-    data_collator=data_collator  
+    data_collator=data_collator,
+    compute_metrics=compute_metrics 
 )
 
 # 9. Entrenar
