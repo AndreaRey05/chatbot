@@ -158,6 +158,7 @@ def chat_diabetes(mensaje_usuario: str, historial: list) -> tuple[str, list, lis
 
     # 2. Clasificar emoción con BERT y buscar contenido en Supabase
     etiqueta, score = clasificar_emocion(mensaje_usuario)
+    # print(f"[DEBUG] Emoción: {etiqueta} | Score: {score:.2f}")
     contenido = []
     if etiqueta and score >= 0.5:  # Solo busca si BERT tiene suficiente confianza
         contenido = obtener_contenido(etiqueta)
