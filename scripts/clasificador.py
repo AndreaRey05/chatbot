@@ -1,9 +1,9 @@
 from transformers import pipeline
+from pathlib import Path
 
-clf = pipeline("text-classification", model="./emociones_diabetes_classifier", tokenizer="./emociones_diabetes_classifier")
+# Ruta absoluta al modelo sin importar desde dónde lo corras
+MODEL_PATH = Path(__file__).parent.parent / "model" / "emociones_diabetes_classifier"
 
-#positive ejemplo
-print(clf("me siento muy triste y agotado ultimamente y no sé que hacer para sentirme mejor, realemente no creo que pueda mejoar y me siento mal por mi familia que me cuida"))  
+clf = pipeline("text-classification", model=str(MODEL_PATH), tokenizer=str(MODEL_PATH))
 
-#negative ejemplo
-#print(clf("Terrible film, waste of time and money. Poor acting."))
+print(clf("odio demasiado cuandp me siento asi, le echo ganas y aún así nada resulta bien"))
