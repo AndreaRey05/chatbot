@@ -11,6 +11,7 @@ import sys
 MAX_HISTORIAL = 10
 
 MODEL_PATH = Path(__file__).parent.parent / "model" / "emociones_diabetes_classifier"
+clasificador = pipeline("text-classification", model=str(MODEL_PATH.resolve()), tokenizer=str(MODEL_PATH.resolve()))
 
 # Carga el modelo una sola vez al iniciar (tarda unos segundos, luego es rápido)
 print("Cargando modelo BERT...")
@@ -46,7 +47,7 @@ CRISIS_SUICIDIO = [
     "para qué seguir", "no tiene caso seguir viviendo", "desaparecer para siempre",
     "ya no quiero seguir", "me quiero quitar la vida", "no quiero seguir viviendo",
     "quiero quitarme la vida", "ganas de morir", "ya no quiero nada",
-    "para que vivir", "para qué vivir", "mejor ya no despertar",
+    "para que vivir", "para qué vivir", "mejor ya no despertar", "me quiero matar",
 ]
 
 CRISIS_AUTOLESION = [
@@ -158,7 +159,7 @@ def chat_diabetes(mensaje_usuario: str, historial: list) -> tuple[str, list, lis
 
     # 2. Clasificar emoción con BERT y buscar contenido en Supabase
     etiqueta, score = clasificar_emocion(mensaje_usuario)
-    # print(f"[DEBUG] Emoción: {etiqueta} | Score: {score:.2f}")
+    print(f"[DEBUG] Emoción: {etiqueta} | Score: {score:.2f}")
     contenido = []
     if etiqueta and score >= 0.5:  # Solo busca si BERT tiene suficiente confianza
         contenido = obtener_contenido(etiqueta)

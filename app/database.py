@@ -68,6 +68,64 @@ def obtener_contenido(etiqueta: str) -> list[dict]:
         return []
 
 
+def guardar_mensaje(sesion_id: str, role: str, contenido: str, 
+                    usuario_id: str = None, emocion: str = "", 
+                    es_crisis: bool = False):
+    try:
+        supabase = get_client()
+        supabase.table("historial_chat").insert({
+            "sesion_id": sesion_id,
+            "usuario_id": usuario_id,
+            "role": role,
+            "contenido": contenido,
+            "emocion": emocion,
+            "es_crisis": es_crisis,
+        }).execute()
+    except Exception as e:
+        print(f"[ERROR] No se pudo guardar mensaje: {e}")
+
+
+def obtener_historial(sesion_id: str) -> list[dict]:
+    try:
+        supabase = get_client()
+        respuesta = (
+            supabase
+            .table("historial_chat")
+            .select("role, contenido, created_at, emocion, es_crisis")
+            .eq("sesion_id", sesion_id)
+            .order("created_at", desc=False)
+            .execute()
+        )
+        return respuesta.data or []
+    except Exception as e:
+        print(f"[ERROR] No se pudo obtener historial: {e}")
+        return []
+
+
+def obtener_sesiones_usuario(usuario_id: str) -> list[dict]:
+    """Devuelve todas las sesiones de un usuario con su primer mensaje."""
+    try:
+        supabase = get_client()
+        respuesta = (
+            supabase
+            .table("historial_chat")
+            .select("sesion_id, contenido, created_at")
+            .eq("usuario_id", usuario_id)
+            .eq("role", "user")
+            .order("created_at", desc=True)
+            .execute()
+        )
+        # Agrupar por sesion_id, quedarse con el primer mensaje de cada una
+        sesiones = {}
+        for item in (respuesta.data or []):
+            sid = item["sesion_id"]
+            if sid not in sesiones:
+                sesiones[sid] = item
+        return list(sesiones.values())
+    except Exception as e:
+        print(f"[ERROR] No se pudo obtener sesiones: {e}")
+        return []
+
 # ─── Prueba local ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     etiqueta_prueba = "agotamiento_desesperanza"
